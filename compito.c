@@ -10,7 +10,8 @@
 long int int_input(char* msg, int minimum_value);
 char* string_input(char* msg, int max_length);
 void load_bst_from_file(bst* carte, char* filename);
-bool aggiorna(bst carte, tipo_key codiceCarta, long int punti);
+bst aggiorna(bst carte, tipo_key codiceCarta, long int punti);
+void print_noAcquisti(bst bst_carte, bst acquisti);
 
 
 
@@ -22,18 +23,26 @@ int main(){
     stampa_bst_inorder(bst_carte);
 
     //punto 3
+    bst acquisti = NULL;
+
     printf("\n-----------------------\n");
     char scelta = string_input("\nSi vogliono inserire degli acquisti? Se si, premere qualsiasi carattere, se no digitare Q: ", 1)[0];
     while(scelta != 'Q'){
         //ogni acquisto è determinato dal numero di carta e dai punti accumulati con quell'acquisto
-        bool esito = aggiorna(bst_carte, (tipo_key) int_input("\nInserire il numero della carta che ha effettuato l'acquisto: ", 1), int_input("\nInserire i punti accumulati: ", 0));
-        if(!esito) printf("ERRORE: la chiave inserita non e' presente\n");
+        struct bnode* nodo_acquisto = aggiorna(bst_carte, (tipo_key) int_input("\nInserire il numero della carta che ha effettuato l'acquisto: ", 1), int_input("\nInserire i punti accumulati: ", 0));
+        if(nodo_acquisto == NULL) printf("ERRORE: la chiave inserita non e' presente\n");
+        else bst_insert(&acquisti, bst_newNode(nodo_acquisto->key, nodo_acquisto->inf));
 
         //richiedo la scelta per un altro eventuale inserimento
         scelta = string_input("\nSi vogliono inserire degli acquisti? Se si, premere qualsiasi carattere, se no digitare Q: ", 1)[0];
     }
 
     stampa_bst_inorder(bst_carte);
+
+
+    //punto 4
+    printf("\n\nElenco degli utenti che non hanno effettuato acquisti: \n");
+    print_noAcquisti(bst_carte, acquisti);
     
 
     printf("\n\n");
@@ -153,8 +162,8 @@ void load_bst_from_file(bst* carte, char* filename){
  * @return true 
  * @return false 
  */
-bool aggiorna(bst carte, tipo_key codiceCarta, long int punti){
-    if(carte == NULL) return false;
+struct bnode* aggiorna(bst carte, tipo_key codiceCarta, long int punti){
+    if(carte == NULL) return NULL;
 
     //visita in-order per scorrere l'albero e trovare la carta
     //printf("\nNodo considerato: %d", carte->key);
@@ -165,7 +174,7 @@ bool aggiorna(bst carte, tipo_key codiceCarta, long int punti){
     else if(codiceCarta == carte->key){
         //aggiorno i punti accumulati
         carte->inf.totPunti += punti;
-        return true; //ho aggiornato i punti
+        return carte;
     }
 
     //se codiceCarta > radice, guardo solo il sottoalbero dx
@@ -173,8 +182,27 @@ bool aggiorna(bst carte, tipo_key codiceCarta, long int punti){
 
 }
 
+/**
+ * @brief Stampa gli utenti che in giornata non hanno effettuato acquisti
+ * 
+ * @param bst_carte 
+ * @param acquisti 
+ */
+void print_noAcquisti(bst bst_carte, bst acquisti){
+    if(bst_carte == NULL) return; 
 
+    print_noAcquisti(bst_carte->left, acquisti);
 
+    //cerco se la carta ha effettuato acquisti
+    struct bnode* noAcquisto = bst_search(acquisti, bst_carte->key);
+    if(noAcquisto == NULL){ //se carte non ha fatto acquisti, lo stampo
+        printf("\n\t- %d ", bst_carte->key);
+        print_tipo_inf(bst_carte->inf);
+    }
+
+    print_noAcquisti(bst_carte->right, acquisti);
+
+}
 
 
 
