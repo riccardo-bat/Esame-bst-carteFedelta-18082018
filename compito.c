@@ -13,6 +13,9 @@ int main(){
     bst bst_carte = NULL;
     load_bst_from_file(&bst_carte, "dati.txt");
 
+    //punto 2
+    stampa_bst_inorder(bst_carte);
+    
 
     printf("\n\n");
     return 0;
