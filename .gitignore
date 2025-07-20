@@ -1,6 +1,7 @@
 *.o
 *.out
 *.exe
+*.gch
 *.html
 *.css
 *.js
